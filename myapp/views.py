@@ -21,6 +21,8 @@ def verify_github_signature(request):
 
     return hmac.compare_digest(github_signature, expected_signature)
 
+
+
 # Webhook receiver
 @csrf_exempt  # GitHub won’t send CSRF token, so we disable it here
 def github_webhook_receiver(request):
@@ -52,6 +54,8 @@ def github_webhook_receiver(request):
     print("GitHub Signature:", request.headers.get("X-Hub-Signature-256"))
     print("Calculated:", "sha256=" + hmac.new(settings.GITHUB_WEBHOOK_SECRET.encode(), request.body, hashlib.sha256).hexdigest())
     return JsonResponse({"status": "success", "event": event_type})
+
+
 
 # Event dashboard
 def event_list(request):
