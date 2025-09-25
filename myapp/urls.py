@@ -16,8 +16,9 @@ Including another URLconf
 """
 
 from django.urls import path
-from myapp.views import github_webhook_receiver, event_list
+from myapp.views import github_webhook_receiver, event_list,event_detail
 urlpatterns = [
    path("webhooks/github/", github_webhook_receiver, name="github_webhook"),
     path("events/", event_list, name="event_list"),
+    path("events/<int:pk>/", event_detail, name="event-detail"),
 ]
