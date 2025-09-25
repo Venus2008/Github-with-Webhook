@@ -21,29 +21,29 @@ def verify_github_signature(request):
 
     return hmac.compare_digest(github_signature, expected_signature)
 
-# 📥 Webhook receiver
+# Webhook receiver
 @csrf_exempt  # GitHub won’t send CSRF token, so we disable it here
 def github_webhook_receiver(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
-    # ✅ Verify signature
+    # Verify signature
     if not verify_github_signature(request):
         return HttpResponseForbidden("Invalid signature")
 
-    # ✅ Get event type from headers
+    # Get event type from headers
     event_type = request.headers.get("X-GitHub-Event", "unknown")
 
-    # ✅ Parse payload
+    # Parse payload
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    # ✅ Extract repo name (if available)
+    # Extract repo name (if available)
     repo_name = payload.get("repository", {}).get("name", "unknown")
 
-    # ✅ Save to DB
+    # Save to DB
     WebhookEvent.objects.create(
         event_type=event_type,
         repo_name=repo_name,
@@ -53,7 +53,7 @@ def github_webhook_receiver(request):
     print("Calculated:", "sha256=" + hmac.new(settings.GITHUB_WEBHOOK_SECRET.encode(), request.body, hashlib.sha256).hexdigest())
     return JsonResponse({"status": "success", "event": event_type})
 
-# 📊 Event dashboard
+# Event dashboard
 def event_list(request):
     events = WebhookEvent.objects.order_by("-received_at")[:50]  # latest 50
     return render(request, "webhooks/event_list.html", {"events": events})
